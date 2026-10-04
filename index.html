@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>MicroStore</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#fff;--bg2:#f7f7f6;--bg3:#f0efec;--text:#1a1a18;--text2:#5a5a56;--text3:#9a9994;--border:rgba(0,0,0,.12);
+--blue:#185FA5;--gbg:#EAF3DE;--gt:#27500A;--abg:#FAEEDA;--at:#633806;--rbg:#FCEBEB;--rt:#791F1F;--r:8px}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1e1c;--bg2:#2a2a27;--bg3:#242422;--text:#f0efec;--text2:#a8a8a2;--text3:#6a6a64;--border:rgba(255,255,255,.14);--blue:#378ADD;--gbg:#173404;--gt:#C0DD97;--abg:#412402;--at:#FAC775;--rbg:#501313;--rt:#F7C1C1}}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:13px}
+.app{display:flex;height:100%}
+.side{width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 8px}
+.brand{padding:4px 8px 14px;border-bottom:1px solid var(--border);margin-bottom:10px}
+.brand b{font-size:16px;display:block}.brand small{color:var(--text3);font-size:11px}
+.nav{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);margin-bottom:2px;border:1px solid transparent;background:none;width:100%;font-size:13px;text-align:left}
+.nav.on{background:var(--bg);color:var(--text);font-weight:500;border-color:var(--border)}
+.cnt{margin-left:auto;background:var(--rbg);color:var(--rt);border-radius:99px;font-size:10px;padding:1px 6px}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.top{display:flex;align-items:center;gap:8px;padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--border)}
+.top h1{font-size:15px;font-weight:500;flex:1}
+.content{flex:1;overflow-y:auto;padding:18px}
+input,select{padding:8px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:13px;width:100%}
+.btn{padding:8px 14px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;white-space:nowrap}
+.btn.p{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn.s{padding:4px 8px;font-size:12px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.stat{background:var(--bg2);border-radius:var(--r);padding:12px}
+.stat small{color:var(--text3);font-size:11px}.stat b{display:block;font-size:20px;margin-top:3px}
+.alert{background:var(--abg);color:var(--at);border-radius:var(--r);padding:9px 12px;margin-bottom:14px}
+h2{font-size:13px;font-weight:500;margin:4px 0 10px}
+.tw{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px}
+th{text-align:left;padding:9px 12px;color:var(--text3);font-weight:500;background:var(--bg2)}
+td{padding:9px 12px;border-top:1px solid var(--border)}
+.bd{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+.ok{background:var(--gbg);color:var(--gt)}.low{background:var(--abg);color:var(--at)}.out{background:var(--rbg);color:var(--rt)}
+.form{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:10px;align-items:end}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;max-width:420px}
+label{font-size:11px;color:var(--text2);display:flex;flex-direction:column;gap:4px}
+.bar{height:8px;background:var(--blue);border-radius:4px}
+.row{display:grid;grid-template-columns:140px 1fr 90px;gap:10px;align-items:center;margin-bottom:8px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:9}
+.ov.on{display:flex}
+.modal{background:var(--bg);border-radius:12px;padding:18px;width:400px;max-width:94vw;max-height:90%;overflow:auto;display:grid;gap:10px}
+#auth{background:var(--bg3);z-index:20}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.empty{padding:24px;text-align:center;color:var(--text3)}
+.err{color:var(--rt);font-size:12px;min-height:14px}
+.dl{display:grid;grid-template-columns:110px 1fr;gap:6px;font-size:12px}.dl span:nth-child(odd){color:var(--text3)}
+.lnk{color:var(--blue);cursor:pointer;text-decoration:underline;background:none;border:0;font-size:12px}
+@media(max-width:680px){
+.app{flex-direction:column}
+.side{order:2;width:100%;flex-direction:row;padding:4px;border-right:0;border-top:1px solid var(--border);overflow-x:auto}
+.brand{display:none}
+.nav{flex-direction:column;gap:2px;font-size:10px;padding:6px 4px;text-align:center;flex:1;min-width:58px}
+.nav span.t{font-size:10px}
+.stats{grid-template-columns:1fr 1fr}
+.form{grid-template-columns:1fr}
+.top{flex-wrap:wrap;padding:10px 12px}
+#q{width:100%!important;order:9}
+.content{padding:12px}
+.row{grid-template-columns:90px 1fr 70px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="side"></aside>
+  <div class="main">
+    <div class="top">
+      <h1 id="title">Dashboard</h1>
+      <input id="q" placeholder="Buscar producto..." style="width:170px" oninput="go('inventario')"/>
+      <span id="who" style="font-size:11px;color:var(--text2)"></span>
+      <button class="btn" id="bcfg" onclick="cfgForm()" title="Configurar negocio">⚙️</button>
+      <button class="btn p" id="bnew" onclick="prodForm()">+ Producto</button>
+      <button class="btn" onclick="logout()">Salir</button>
+    </div>
+    <div class="content" id="c"></div>
+  </div>
+</div>
+<div class="ov" id="ov"><div class="modal" id="m"></div></div>
+<div class="ov on" id="auth"><div class="modal" id="am"></div></div>
+
+<script>
+const hoy=()=>new Date().toISOString().slice(0,10);
+const def={
+  cfg:{nombre:'MicroStore',rubro:'Control de inventario',moneda:'$'},
+  users:[],
+  prods:[
+    {id:'P001',nombre:'Camiseta básica',cat:'Ropa',stock:45,min:10,precio:35000,und:'unidad'},
+    {id:'P002',nombre:'Taza personalizada',cat:'Hogar',stock:8,min:15,precio:18000,und:'unidad'},
+    {id:'P003',nombre:'Vela aromática',cat:'Hogar',stock:0,min:10,precio:22000,und:'unidad'},
+    {id:'P004',nombre:'Caja de regalo',cat:'Empaques',stock:30,min:10,precio:6500,und:'unidad'},
+    {id:'P005',nombre:'Bolsa ecológica',cat:'Empaques',stock:5,min:12,precio:4000,und:'unidad'}
+  ],
+  movs:[
+    {fecha:hoy(),tipo:'Entrada',pid:'P001',cant:20,nota:'Compra a proveedor',user:'Sistema'},
+    {fecha:hoy(),tipo:'Salida',pid:'P002',cant:5,nota:'Venta',user:'Sistema'}
+  ]
+};
+let S,me=null,fc='',fe='';
+try{S=JSON.parse(localStorage.getItem('microstore-v1'))}catch(e){}
+if(!S||!S.prods)S=JSON.parse(JSON.stringify(def));
+const save=()=>{try{localStorage.setItem('microstore-v1',JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>S.cfg.moneda+Number(n).toLocaleString('es');
+const est=p=>p.stock<=0?'out':p.stock<=p.min?'low':'ok';
+const lbl={ok:'En stock',low:'Stock bajo',out:'Agotado'};
+const bd=e=>`<span class="bd ${e}">${lbl[e]}</span>`;
+const nom=id=>(S.prods.find(p=>p.id===id)||{nombre:'(eliminado)'}).nombre;
+const alertas=()=>S.prods.filter(p=>est(p)!=='ok');
+
+/* ── Roles y permisos ── */
+const ROLES=['Administrador','Empleado','Consulta'];
+const PERM={Administrador:['crear','editar','borrar','mov','users','cfg'],Empleado:['crear','editar','mov'],Consulta:[]};
+const can=a=>me&&(PERM[me.rol]||[]).includes(a);
+
+/* ── Autenticación (almacenada en este navegador) ── */
+async function hash(p){
+  try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('ms:'+p));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  catch(e){let h=0;for(const c of 'ms:'+p)h=(h*31+c.charCodeAt(0))|0;return 'x'+h}
+}
+function authView(mode){
+  const reg=mode==='reg'||!S.users.length;
+  $('am').innerHTML=`<b style="font-size:16px">${esc(S.cfg.nombre)}</b>
+  <span style="color:var(--text2)">${reg?'Crea tu cuenta para acceder al sistema':'Inicia sesión para continuar'}</span>
+  ${reg&&!S.users.length?'<span class="alert" style="margin:0">El primer usuario registrado será Administrador.</span>':''}
+  ${reg?'<label>Nombre<input id="an"/></label>':''}
+  <label>Correo<input id="ae" type="email"/></label>
+  <label>Contraseña<input id="ap" type="password"/></label>
+  ${reg?'<label>Confirmar contraseña<input id="ac" type="password"/></label>':''}
+  <div class="err" id="aerr"></div>
+  <button class="btn p" onclick="${reg?'doReg()':'doLogin()'}">${reg?'Registrarme':'Entrar'}</button>
+  ${S.users.length?`<button class="lnk" onclick="authView('${reg?'login':'reg'}')">${reg?'Ya tengo cuenta: iniciar sesión':'No tengo cuenta: registrarme'}</button>`:''}`;
+}
+const aerr=t=>$('aerr').textContent=t;
+async function doReg(){
+  const n=$('an').value.trim(),e=$('ae').value.trim().toLowerCase(),p=$('ap').value;
+  if(!n||!/^\S+@\S+\.\S+$/.test(e))return aerr('Escribe tu nombre y un correo válido.');
+  if(p.length<6)return aerr('La contraseña debe tener al menos 6 caracteres.');
+  if(p!==$('ac').value)return aerr('Las contraseñas no coinciden.');
+  if(S.users.some(u=>u.email===e))return aerr('Ese correo ya está registrado.');
+  S.users.push({nombre:n,email:e,hash:await hash(p),rol:S.users.length?'Empleado':'Administrador'});
+  save();enter(e);
+}
+async function doLogin(){
+  const e=$('ae').value.trim().toLowerCase(),h=await hash($('ap').value);
+  const u=S.users.find(x=>x.email===e&&x.hash===h);
+  if(!u)return aerr('Correo o contraseña incorrectos.');
+  enter(e);
+}
+function enter(email){
+  me=S.users.find(u=>u.email===email);
+  try{sessionStorage.setItem('ms-session',email)}catch(e){}
+  $('auth').classList.remove('on');
+  $('who').textContent=me.nombre+' · '+me.rol;
+  $('bnew').style.display=can('crear')?'':'none';
+  $('bcfg').style.display=can('cfg')?'':'none';
+  go('dashboard');
+}
+function logout(){
+  me=null;try{sessionStorage.removeItem('ms-session')}catch(e){}
+  authView('login');$('auth').classList.add('on');
+}
+
+/* ── Navegación ── */
+let view='dashboard';
+const views=()=>[['dashboard','📊','Inicio'],['inventario','📦','Inventario'],['entradas','⬇️','Entradas'],['salidas','⬆️','Salidas'],['reportes','📈','Reportes'],['alertas','🔔','Alertas'],...(can('users')?[['usuarios','👥','Usuarios']]:[])];
+function side(){
+  $('side').innerHTML=`<div class="brand"><b>${esc(S.cfg.nombre)}</b><small>${esc(S.cfg.rubro)}</small></div>`+
+  views().map(v=>`<button class="nav ${v[0]===view?'on':''}" onclick="go('${v[0]}')">${v[1]}<span class="t">${v[2]}</span>${v[0]==='alertas'&&alertas().length?`<span class="cnt">${alertas().length}</span>`:''}</button>`).join('');
+  document.title=S.cfg.nombre;
+}
+function go(v){
+  if(!me)return;
+  if(!views().some(x=>x[0]===v))v='dashboard';
+  view=v;side();$('title').textContent=views().find(x=>x[0]===v)[2].replace('Inicio','Dashboard');render();
+}
+function render(){
+  const f={dashboard,inventario,entradas:()=>mov('Entrada'),salidas:()=>mov('Salida'),reportes,alertas:al,usuarios}[view];
+  $('c').innerHTML=f();
+}
+
+/* ── Vistas ── */
+function movTable(list){
+  if(!list.length)return '<div class="empty">Sin movimientos todavía</div>';
+  return `<div class="tw"><table><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cant.</th><th>Nota</th><th>Usuario</th></tr>`+
+  list.map(m=>`<tr><td>${m.fecha}</td><td><span class="bd ${m.tipo==='Entrada'?'ok':'low'}">${m.tipo}</span></td><td>${esc(nom(m.pid))}</td><td>${m.cant}</td><td>${esc(m.nota||'')}</td><td>${esc(m.user||'')}</td></tr>`).join('')+'</table></div>';
+}
+function dashboard(){
+  const u=S.prods.reduce((a,p)=>a+p.stock,0),v=S.prods.reduce((a,p)=>a+p.stock*p.precio,0),a=alertas().length;
+  return `<div class="stats"><div class="stat"><small>Productos</small><b>${S.prods.length}</b></div>
+  <div class="stat"><small>Unidades en stock</small><b>${u}</b></div>
+  <div class="stat"><small>Valor del inventario</small><b>${money(v)}</b></div>
+  <div class="stat"><small>Alertas</small><b>${a}</b></div></div>`+
+  (a?`<div class="alert">⚠️ ${a} producto(s) con stock bajo o agotado. <a href="#" onclick="go('alertas');return false" style="color:inherit;font-weight:500">Ver</a></div>`:'')+
+  `<h2>Últimos movimientos</h2>`+movTable([...S.movs].reverse().slice(0,6));
+}
+function inventario(){
+  const q=($('q').value||'').toLowerCase();
+  const cats=[...new Set(S.prods.map(p=>p.cat))];
+  const l=S.prods.filter(p=>(p.nombre+p.cat+p.id).toLowerCase().includes(q)&&(!fc||p.cat===fc)&&(!fe||est(p)===fe));
+  const filt=`<div class="filters"><label>Categoría<select onchange="fc=this.value;render()"><option value="">Todas</option>${cats.map(c=>`<option ${c===fc?'selected':''} value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label>
+  <label>Estado<select onchange="fe=this.value;render()"><option value="">Todos</option>${Object.keys(lbl).map(k=>`<option ${k===fe?'selected':''} value="${k}">${lbl[k]}</option>`).join('')}</select></label></div>`;
+  if(!l.length)return filt+'<div class="empty">No se encontraron productos con esos criterios.</div>';
+  return filt+`<div class="tw"><table><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Estado</th><th></th></tr>`+
+  l.map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.nombre)}</td><td>${esc(p.cat)}</td><td>${p.stock} ${esc(p.und||'')}</td><td>${money(p.precio)}</td><td>${bd(est(p))}</td>
+  <td style="white-space:nowrap"><button class="btn s" onclick="detalle('${p.id}')">Ver</button>${can('editar')?` <button class="btn s" onclick="prodForm('${p.id}')">Editar</button>`:''}${can('borrar')?` <button class="btn s" onclick="del('${p.id}')">🗑</button>`:''}</td></tr>`).join('')+'</table></div>';
+}
+function detalle(id){
+  const p=S.prods.find(x=>x.id===id);if(!p)return;
+  open_(`<b style="font-size:15px">${esc(p.nombre)}</b>
+  <div class="dl"><span>Código</span><span>${esc(p.id)}</span><span>Categoría</span><span>${esc(p.cat)}</span>
+  <span>Disponibilidad</span><span>${p.stock} ${esc(p.und||'')} ${bd(est(p))}</span><span>Stock mínimo</span><span>${p.min}</span>
+  <span>Precio unitario</span><span>${money(p.precio)}</span><span>Valor en stock</span><span>${money(p.stock*p.precio)}</span></div>
+  <h2 style="margin-top:6px">Últimos movimientos</h2>`+
+  (S.movs.filter(m=>m.pid===id).slice(-4).reverse().map(m=>`<div style="font-size:12px">${m.fecha} · ${m.tipo} · ${m.cant}</div>`).join('')||'<div style="color:var(--text3);font-size:12px">Sin movimientos</div>')+
+  `<button class="btn" onclick="close_()">Cerrar</button>`);
+}
+function mov(tipo){
+  if(!can('mov'))return '<div class="empty">Tu rol (Consulta) solo permite ver la información.</div>'+movTable([...S.movs].reverse().filter(m=>m.tipo===tipo));
+  const opts=S.prods.map(p=>`<option value="${p.id}">${esc(p.nombre)} (${p.stock})</option>`).join('');
+  return `<div class="form"><label>Producto<select id="mp">${opts}</select></label>
+  <label>Cantidad<input id="mc" type="number" min="1" value="1"/></label>
+  <label>Nota (opcional)<input id="mn" placeholder="${tipo==='Entrada'?'Ej: compra o producción':'Ej: venta o uso interno'}"/></label>
+  <button class="btn p" onclick="addMov('${tipo}')">Registrar ${tipo.toLowerCase()}</button></div>`+
+  movTable([...S.movs].reverse().filter(m=>m.tipo===tipo));
+}
+function addMov(tipo){
+  if(!can('mov'))return;
+  const pid=$('mp').value,c=parseInt($('mc').value),p=S.prods.find(x=>x.id===pid);
+  if(!p||!c||c<1)return;
+  if(tipo==='Salida'&&c>p.stock){alert('No hay suficiente stock (disponible: '+p.stock+')');return}
+  p.stock+=tipo==='Entrada'?c:-c; /* el stock se actualiza automáticamente */
+  S.movs.push({fecha:hoy(),tipo,pid,cant:c,nota:$('mn').value,user:me.nombre});
+  save();side();render();
+}
+function al(){
+  const l=alertas();
+  if(!l.length)return '<div class="empty">✅ Todo en orden, no hay alertas.</div>';
+  return `<div class="tw"><table><tr><th>Producto</th><th>Stock</th><th>Mínimo</th><th>Estado</th></tr>`+
+  l.map(p=>`<tr><td>${esc(p.nombre)}</td><td>${p.stock}</td><td>${p.min}</td><td>${bd(est(p))}</td></tr>`).join('')+'</table></div>';
+}
+function reportes(){
+  if(!S.prods.length)return '<div class="empty">Sin datos</div>';
+  const top=[...S.prods].sort((a,b)=>b.stock*b.precio-a.stock*a.precio).slice(0,6),mx=Math.max(1,top[0].stock*top[0].precio);
+  const cats={};S.prods.forEach(p=>{cats[p.cat]=(cats[p.cat]||0)+p.stock*p.precio});
+  const sum=t=>S.movs.filter(m=>m.tipo===t).reduce((a,m)=>a+m.cant,0);
+  return `<div class="stats"><div class="stat"><small>Unidades ingresadas</small><b>${sum('Entrada')}</b></div><div class="stat"><small>Unidades de salida</small><b>${sum('Salida')}</b></div>
+  <div class="stat"><small>Categorías</small><b>${Object.keys(cats).length}</b></div><div class="stat"><small>Movimientos</small><b>${S.movs.length}</b></div></div>
+  <h2>Productos con mayor valor en inventario</h2>`+
+  top.map(p=>`<div class="row"><span>${esc(p.nombre)}</span><div class="bar" style="width:${Math.max(3,p.stock*p.precio/mx*100)}%"></div><span>${money(p.stock*p.precio)}</span></div>`).join('')+
+  `<h2 style="margin-top:16px">Valor por categoría</h2><div class="tw"><table><tr><th>Categoría</th><th>Valor</th></tr>`+
+  Object.entries(cats).map(([k,v])=>`<tr><td>${esc(k)}</td><td>${money(v)}</td></tr>`).join('')+'</table></div>';
+}
+
+/* ── Gestión de usuarios y roles (solo Administrador) ── */
+function usuarios(){
+  return `<div class="alert" style="background:var(--bg2);color:var(--text2)"><b>Administrador:</b> todo · <b>Empleado:</b> crear/editar productos y registrar movimientos · <b>Consulta:</b> solo lectura</div>
+  <div class="tw"><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th></th></tr>`+
+  S.users.map(u=>`<tr><td>${esc(u.nombre)}</td><td>${esc(u.email)}</td>
+  <td><select onchange="setRol('${esc(u.email)}',this.value)" style="width:150px">${ROLES.map(r=>`<option ${r===u.rol?'selected':''}>${r}</option>`).join('')}</select></td>
+  <td>${u.email!==me.email?`<button class="btn s" onclick="delUser('${esc(u.email)}')">🗑</button>`:'<small style="color:var(--text3)">(tú)</small>'}</td></tr>`).join('')+'</table></div>';
+}
+function setRol(email,rol){
+  const u=S.users.find(x=>x.email===email);
+  if(u.rol==='Administrador'&&rol!=='Administrador'&&S.users.filter(x=>x.rol==='Administrador').length<2){alert('Debe existir al menos un Administrador.');render();return}
+  u.rol=rol;save();
+  if(u.email===me.email){enter(me.email)}else render();
+}
+function delUser(email){if(confirm('¿Eliminar este usuario?')){S.users=S.users.filter(u=>u.email!==email);save();render()}}
+
+/* ── Formularios ── */
+function open_(h){$('m').innerHTML=h;$('ov').classList.add('on')}
+function close_(){$('ov').classList.remove('on')}
+$('ov').addEventListener('click',e=>{if(e.target.id==='ov')close_()});
+function prodForm(id){
+  if(!can(id?'editar':'crear'))return;
+  const p=S.prods.find(x=>x.id===id)||{nombre:'',cat:'',stock:0,min:5,precio:0,und:'unidad'};
+  const cats=[...new Set(S.prods.map(x=>x.cat))].map(c=>`<option value="${esc(c)}">`).join('');
+  open_(`<b>${id?'Editar':'Nuevo'} producto</b>
+  <label>Nombre<input id="f1" value="${esc(p.nombre)}"/></label>
+  <div class="g2"><label>Categoría<input id="f2" list="cl" value="${esc(p.cat)}" placeholder="Ej: Servicios, Ropa..."/><datalist id="cl">${cats}</datalist></label>
+  <label>Unidad<input id="f3" value="${esc(p.und||'')}" placeholder="unidad, kg, caja..."/></label></div>
+  <div class="g2"><label>Stock${id?'':' inicial'}<input id="f4" type="number" min="0" value="${p.stock}"/></label>
+  <label>Stock mínimo<input id="f5" type="number" min="0" value="${p.min}"/></label></div>
+  <label>Precio unitario<input id="f6" type="number" min="0" value="${p.precio}"/></label>
+  <div class="g2"><button class="btn" onclick="close_()">Cancelar</button><button class="btn p" onclick="saveProd('${id||''}')">Guardar</button></div>`);
+}
+function saveProd(id){
+  const n=$('f1').value.trim();if(!n){alert('Escribe un nombre');return}
+  const d={nombre:n,cat:$('f2').value.trim()||'General',und:$('f3').value.trim()||'unidad',stock:+$('f4').value||0,min:+$('f5').value||0,precio:+$('f6').value||0};
+  if(id)Object.assign(S.prods.find(x=>x.id===id),d);
+  else{let k=S.prods.length+1,nid;do{nid='P'+String(k++).padStart(3,'0')}while(S.prods.some(x=>x.id===nid));S.prods.push({id:nid,...d})}
+  save();close_();side();render();
+}
+function del(id){if(can('borrar')&&confirm('¿Eliminar este producto?')){S.prods=S.prods.filter(p=>p.id!==id);save();side();render()}}
+function cfgForm(){
+  if(!can('cfg'))return;
+  open_(`<b>Configuración del negocio</b>
+  <label>Nombre del emprendimiento<input id="c1" value="${esc(S.cfg.nombre)}"/></label>
+  <label>Descripción / rubro<input id="c2" value="${esc(S.cfg.rubro)}"/></label>
+  <label>Símbolo de moneda<input id="c3" value="${esc(S.cfg.moneda)}"/></label>
+  <div class="g2"><button class="btn" onclick="close_()">Cancelar</button><button class="btn p" onclick="saveCfg()">Guardar</button></div>`);
+}
+function saveCfg(){
+  S.cfg={nombre:$('c1').value||'MicroStore',rubro:$('c2').value,moneda:$('c3').value||'$'};
+  save();close_();side();render();
+}
+
+/* ── Inicio ── */
+let ses=null;try{ses=sessionStorage.getItem('ms-session')}catch(e){}
+if(ses&&S.users.some(u=>u.email===ses)){enter(ses)}else{authView(S.users.length?'login':'reg')}
+</script>
+</body>
+</html>
