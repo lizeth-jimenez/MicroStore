@@ -87,6 +87,15 @@ label{font-size:11px;color:var(--text2);display:flex;flex-direction:column;gap:4
 <div class="ov on" id="auth"><div class="modal" id="am"></div></div>
 
 <script>
+// Configuración de conexión a MongoDB Atlas
+const MONGODB_CONFIG = {  
+  // Reemplaza <db_password> con la contraseña real de tu usuario veeik15_db_user
+  uri: "mongodb+srv://veeik15_db_user:<Aa123456>@cluster0.7tzceoo.mongodb.net/?appName=Cluster0",
+  database: "microstore_db",
+  collection: "productos"
+};
+
+console.log("Configuración de MongoDB Atlas lista en Cluster0");
 const hoy=()=>new Date().toISOString().slice(0,10);
 const def={
   cfg:{nombre:'MicroStore',rubro:'Control de inventario',moneda:'$'},
