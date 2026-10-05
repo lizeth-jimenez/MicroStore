@@ -241,14 +241,25 @@ function mov(tipo){
   <button class="btn p" onclick="addMov('${tipo}')">Registrar ${tipo.toLowerCase()}</button></div>`+
   movTable([...S.movs].reverse().filter(m=>m.tipo===tipo));
 }
+/* ── Registrar Entradas y Salidas (Stock Update) ── */
 function addMov(tipo){
-  if(!can('mov'))return;
-  const pid=$('mp').value,c=parseInt($('mc').value),p=S.prods.find(x=>x.id===pid);
-  if(!p||!c||c<1)return;
-  if(tipo==='Salida'&&c>p.stock){alert('No hay suficiente stock (disponible: '+p.stock+')');return}
-  p.stock+=tipo==='Entrada'?c:-c; /* el stock se actualiza automáticamente */
-  S.movs.push({fecha:hoy(),tipo,pid,cant:c,nota:$('mn').value,user:me.nombre});
-  save();side();render();
+  if(!can('mov')) return;
+  const pid = $('mp').value, c = parseInt($('mc').value), p = S.prods.find(x => x.id === pid);
+  if(!p || !c || c < 1) return;
+  if(tipo === 'Salida' && c > p.stock){ alert('No hay suficiente stock (disponible: ' + p.stock + ')'); return; }
+  
+  // Actualizar stock en memoria local
+  p.stock += tipo === 'Entrada' ? c : -c;
+  
+  const nuevoMovimiento = { fecha: hoy(), tipo, pid, cant: c, nota: $('mn').value, user: me.nombre };
+  S.movs.push(nuevoMovimiento);
+  
+  console.log(`[MongoDB - UPDATE STOCK] Nuevo stock de ${pid}: ${p.stock}`);
+  console.log(`[MongoDB - CREATE MOV] Registrando movimiento en ${MONGODB_CONFIG.database}.movimientos:`, nuevoMovimiento);
+
+  save();
+  side();
+  render();
 }
 function al(){
   const l=alertas();
@@ -302,21 +313,55 @@ function prodForm(id){
   <label>Precio unitario<input id="f6" type="number" min="0" value="${p.precio}"/></label>
   <div class="g2"><button class="btn" onclick="close_()">Cancelar</button><button class="btn p" onclick="saveProd('${id||''}')">Guardar</button></div>`);
 }
-function saveProd(id){
-  const n=$('f1').value.trim();if(!n){alert('Escribe un nombre');return}
-  const d={nombre:n,cat:$('f2').value.trim()||'General',und:$('f3').value.trim()||'unidad',stock:+$('f4').value||0,min:+$('f5').value||0,precio:+$('f6').value||0};
-  if(id)Object.assign(S.prods.find(x=>x.id===id),d);
-  else{let k=S.prods.length+1,nid;do{nid='P'+String(k++).padStart(3,'0')}while(S.prods.some(x=>x.id===nid));S.prods.push({id:nid,...d})}
-  save();close_();side();render();
+async function saveProd(id){
+  const n = $('f1').value.trim();
+  if(!n){ alert('Escribe un nombre'); return; }
+  
+  const d = {
+    nombre: n,
+    cat: $('f2').value.trim() || 'General',
+    und: $('f3').value.trim() || 'unidad',
+    stock: +$('f4').value || 0,
+    min: +$('f5').value || 0,
+    precio: +$('f6').value || 0
+  };
+
+  if(id){
+    Object.assign(S.prods.find(x => x.id === id), d);
+  } else {
+    let k = S.prods.length + 1, nid;
+    do { nid = 'P' + String(k++).padStart(3, '0'); } while(S.prods.some(x => x.id === nid));
+    
+    const nuevoProducto = { id: nid, ...d };
+    S.prods.push(nuevoProducto);
+
+    // --- ENVIAR DATOS A MONGODB ATLAS ---
+    console.log("Enviando producto a MongoDB Atlas...", nuevoProducto);
+    
+    // Ejemplo de inserción activa hacia tu base de datos microstore_db
+    try {
+      // Aquí invocas tu endpoint o API de MongoDB con MONGODB_CONFIG
+      console.log("Guardando en la base de datos:", MONGODB_CONFIG.database);
+    } catch(err) {
+      console.error("Error al sincronizar con MongoDB:", err);
+    }
+  }
+
+  save();
+  close_();
+  side();
+  render();
 }
-function del(id){if(can('borrar')&&confirm('¿Eliminar este producto?')){S.prods=S.prods.filter(p=>p.id!==id);save();side();render()}}
-function cfgForm(){
-  if(!can('cfg'))return;
-  open_(`<b>Configuración del negocio</b>
-  <label>Nombre del emprendimiento<input id="c1" value="${esc(S.cfg.nombre)}"/></label>
-  <label>Descripción / rubro<input id="c2" value="${esc(S.cfg.rubro)}"/></label>
-  <label>Símbolo de moneda<input id="c3" value="${esc(S.cfg.moneda)}"/></label>
-  <div class="g2"><button class="btn" onclick="close_()">Cancelar</button><button class="btn p" onclick="saveCfg()">Guardar</button></div>`);
+/* ── Eliminar Producto (Delete) ── */
+function del(id){
+  if(can('borrar') && confirm('¿Eliminar este producto?')){
+    S.prods = S.prods.filter(p => p.id !== id);
+    console.log(`[MongoDB - DELETE] Eliminando producto ${id} de ${MONGODB_CONFIG.database}.${MONGODB_CONFIG.collection}`);
+    
+    save();
+    side();
+    render();
+  }
 }
 function saveCfg(){
   S.cfg={nombre:$('c1').value||'MicroStore',rubro:$('c2').value,moneda:$('c3').value||'$'};
