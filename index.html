@@ -363,6 +363,14 @@ function del(id){
     render();
   }
 }
+function cfgForm(){
+  if(!can('cfg')) return;
+  open_(`<b>Configuración del negocio</b>
+  <label>Nombre del emprendimiento<input id="c1" value="${esc(S.cfg.nombre)}"/></label>
+  <label>Descripción / rubro<input id="c2" value="${esc(S.cfg.rubro)}"/></label>
+  <label>Símbolo de moneda<input id="c3" value="${esc(S.cfg.moneda)}"/></label>
+  <div class="g2"><button class="btn" onclick="close_()">Cancelar</button><button class="btn p" onclick="saveCfg()">Guardar</button></div>`);
+}
 function saveCfg(){
   S.cfg={nombre:$('c1').value||'MicroStore',rubro:$('c2').value,moneda:$('c3').value||'$'};
   save();close_();side();render();
