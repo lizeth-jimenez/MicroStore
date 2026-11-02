@@ -209,11 +209,66 @@ function reportes() {
     Object.entries(cats).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${money(v)}</td></tr>`).join('') + '</table></div>';
 }
 function usuarios() {
+  if (!can('users')) return '<div class="empty">No tienes permisos para ver esta sección.</div>';
   return `<div class="alert" style="background:var(--bg2);color:var(--text2)"><b>Administrador:</b> todo · <b>Empleado:</b> crear/editar productos y registrar movimientos · <b>Consulta:</b> solo lectura</div>
+  <div style="margin-bottom:12px">
+    <button class="btn p" onclick="userForm()">+ Nuevo usuario</button>
+  </div>
   <div class="tw"><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th></th></tr>` +
     S.users.map(u => `<tr><td>${esc(u.nombre)}</td><td>${esc(u.email)}</td>
   <td><select onchange="setRol('${esc(u.email)}',this.value)" style="width:150px">${ROLES.map(r => `<option ${r === u.rol ? 'selected' : ''}>${r}</option>`).join('')}</select></td>
   <td>${u.email !== me.email ? `<button class="btn s danger" title="Eliminar" aria-label="Eliminar" onclick="delUser('${esc(u.email)}')">🗑</button>` : '<small style="color:var(--text3)">(tú)</small>'}</td></tr>`).join('') + '</table></div>';
+}
+function userForm() {
+  open_(`<b>Nuevo usuario</b>
+  <label>Nombre<input id="uf-nombre" placeholder="Nombre completo"/></label>
+  <label>Correo electrónico<input id="uf-email" type="email" placeholder="correo@empleado.com"/></label>
+  <label>Contraseña<input id="uf-pass" type="password" placeholder="••••••••"/></label>
+  <label>Rol
+    <select id="uf-rol">
+      ${ROLES.map(r => `<option value="${r}">${r}</option>`).join('')}
+    </select>
+  </label>
+  <div class="g2" style="margin-top:10px">
+    <button class="btn" onclick="close_()">Cancelar</button>
+    <button class="btn p" onclick="saveNewUser()">Guardar usuario</button>
+  </div>`);
+}
+
+async function saveNewUser() {
+  const nombre = $('uf-nombre').value.trim();
+  const email = $('uf-email').value.trim().toLowerCase();
+  const pass = $('uf-pass').value;
+  const rol = $('uf-rol').value;
+
+  if (!nombre || !email || !pass) {
+    alert('Por favor completa todos los campos.');
+    return;
+  }
+
+  try {
+    // Crear el objeto del nuevo usuario (guardando la contraseña tal como lo configuramos)
+    const nuevoUsuario = {
+      nombre: nombre,
+      email: email,
+      hash: pass, 
+      rol: rol
+    };
+
+    // Guardar en Firestore dentro de la colección 'users'
+    await firebase.firestore().collection('users').add(nuevoUsuario);
+
+    // Actualizar el arreglo local S.users para reflejarlo de inmediato en pantalla
+    S.users.push(nuevoUsuario);
+    save();
+    
+    close_();
+    render();
+    alert('¡Usuario creado con éxito!');
+  } catch (error) {
+    console.error("Error al crear usuario:", error);
+    alert('Ocurrió un error al guardar el usuario en Firestore.');
+  }
 }
 function setRol(email, rol) {
   const u = S.users.find(x => x.email === email);
