@@ -102,6 +102,14 @@ async function doLogin() {
 function enter(userData) {
   me = userData;
   try { sessionStorage.setItem('ms-session', me.email) } catch (e) { }
+  
+  try {
+    const snap = await firebase.firestore().collection('users').get();
+    S.users = snap.docs.map(doc => doc.data());
+  } catch (e) {
+    console.error("Error cargando usuarios:", e);
+  }
+
   $('auth').classList.remove('on');
   $('who').textContent = me.nombre + ' · ' + me.rol;
   $('bnew').style.display = can('crear') ? '' : 'none';
