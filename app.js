@@ -73,20 +73,37 @@ function authView(mode) {
   ${S.users.length ? `<button class="lnk" onclick="authView('${reg ? 'login' : 'reg'}')">${reg ? 'Ya tengo cuenta: iniciar sesión' : 'No tengo cuenta: registrarme'}</button>` : ''}`;
 }
 const aerr = t => $('aerr').textContent = t;
-async function doReg() {
-  const n = $('an').value.trim(), e = $('ae').value.trim().toLowerCase(), p = $('ap').value;
-  if (!n || !/^\S+@\S+\.\S+$/.test(e)) return aerr('Escribe tu nombre y un correo válido.');
-  if (p.length < 6) return aerr('La contraseña debe tener al menos 6 caracteres.');
-  if (p !== $('ac').value) return aerr('Las contraseñas no coinciden.');
-  if (S.users.some(u => u.email === e)) return aerr('Ese correo ya está registrado.');
-  S.users.push({ nombre: n, email: e, hash: await hash(p), rol: S.users.length ? 'Empleado' : 'Administrador' });
-  save(); enter(e);
-}
+
 async function doLogin() {
-  const e = $('ae').value.trim().toLowerCase(), h = await hash($('ap').value);
-  const u = S.users.find(x => x.email === e && x.hash === h);
-  if (!u) return aerr('Correo o contraseña incorrectos.');
-  enter(e);
+  const e = $('ae').value.trim().toLowerCase();
+  const p = $('ap').value;
+  
+  try {
+    // Consultar directamente en Firestore la colección 'users'
+    const userRef = firebase.firestore().collection('users').where('email', '==', e);
+    const snapshot = await userRef.get();
+    
+    if (snapshot.empty) {
+      return aerr('Correo o contraseña incorrectos.');
+    }
+    
+    // Obtener los datos del documento encontrado
+    const doc = snapshot.docs[0];
+    const userData = doc.data();
+    
+    const hashedPass = await hash(p);
+    
+    if (userData.hash !== hashedPass) {
+      return aerr('Correo o contraseña incorrectos.');
+    }
+    
+    // Asignar el usuario actual y entrar a la app
+    me = userData;
+    enter(e);
+  } catch (error) {
+    console.error("Error en el login:", error);
+    aerr('Ocurrió un error al intentar iniciar sesión.');
+  }
 }
 function enter(email) {
   me = S.users.find(u => u.email === email);
