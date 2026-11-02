@@ -266,18 +266,20 @@ async function saveNewUser() {
   }
 
   try {
-    // Crear el objeto del nuevo usuario (guardando la contraseña tal como lo configuramos)
+    // 1. Cifrar la contraseña con la misma función hash que usa el login
+    const hashedPassword = await hash(pass);
+
     const nuevoUsuario = {
       nombre: nombre,
       email: email,
-      hash: pass, 
+      hash: hashedPassword, // <--- Aquí guardamos el hash correcto
       rol: rol
     };
 
-    // Guardar en Firestore dentro de la colección 'users'
+    // 2. Guardar en Firestore dentro de la colección 'users'
     await firebase.firestore().collection('users').add(nuevoUsuario);
 
-    // Actualizar el arreglo local S.users para reflejarlo de inmediato en pantalla
+    // 3. Actualizar el arreglo local y cerrar formulario
     S.users.push(nuevoUsuario);
     save();
     
