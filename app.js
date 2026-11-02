@@ -76,7 +76,6 @@ async function doLogin() {
   const p = $('ap').value;
   
   try {
-    // Consultar directamente en Firestore la colección 'users'
     const userRef = firebase.firestore().collection('users').where('email', '==', e);
     const snapshot = await userRef.get();
     
@@ -84,7 +83,6 @@ async function doLogin() {
       return aerr('Correo o contraseña incorrectos.');
     }
     
-    // Obtener los datos del documento encontrado
     const doc = snapshot.docs[0];
     const userData = doc.data();
     
@@ -94,17 +92,16 @@ async function doLogin() {
       return aerr('Correo o contraseña incorrectos.');
     }
     
-    // Asignar el usuario actual y entrar a la app
-    me = userData;
-    enter(e);
+    // Entrar pasando el objeto del usuario de Firestore
+    enter(userData);
   } catch (error) {
     console.error("Error en el login:", error);
     aerr('Ocurrió un error al intentar iniciar sesión.');
   }
 }
-function enter(email) {
-  me = S.users.find(u => u.email === email);
-  try { sessionStorage.setItem('ms-session', email) } catch (e) { }
+function enter(userData) {
+  me = userData;
+  try { sessionStorage.setItem('ms-session', me.email) } catch (e) { }
   $('auth').classList.remove('on');
   $('who').textContent = me.nombre + ' · ' + me.rol;
   $('bnew').style.display = can('crear') ? '' : 'none';
@@ -293,4 +290,17 @@ function saveCfg() {
 
 /* ── Inicio ── */
 let ses = null; try { ses = sessionStorage.getItem('ms-session') } catch (e) { }
-if (ses && S.users.some(u => u.email === ses)) { enter(ses) } else { authView(S.users.length ? 'login' : 'reg') }
+/* ── Inicio ── */
+let ses = null; try { ses = sessionStorage.getItem('ms-session') } catch (e) { }
+if (ses) {
+  // Si hay sesión guardada, consultamos Firestore para restaurarla
+  firebase.firestore().collection('users').where('email', '==', ses).get().then(snap => {
+    if (!snap.empty) {
+      enter(snap.docs[0].data());
+    } else {
+      authView();
+    }
+  }).catch(() => authView());
+} else {
+  authView();
+}
