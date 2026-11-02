@@ -217,15 +217,26 @@ function reportes() {
     Object.entries(cats).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${money(v)}</td></tr>`).join('') + '</table></div>';
 }
 function usuarios() {
-  if (!can('users')) return '<div class="empty">No tienes permisos para ver esta sección.</div>';
-  return `<div class="alert" style="background:var(--bg2);color:var(--text2)"><b>Administrador:</b> todo · <b>Empleado:</b> crear/editar productos y registrar movimientos · <b>Consulta:</b> solo lectura</div>
+  // Validar estrictamente que el usuario sea Administrador
+  if (!can('users') || me.rol !== 'Administrador') {
+    return '<div class="empty">No tienes permisos para ver esta sección. Esta área es exclusiva del Administrador.</div>';
+  }
+
+  return `<div class="alert" style="background:var(--bg2);color:var(--text2)"><b>Administrador:</b> gestión total de usuarios y sistema · <b>Empleado:</b> gestión de productos y movimientos</div>
   <div style="margin-bottom:12px">
     <button class="btn p" onclick="userForm()">+ Nuevo usuario</button>
   </div>
   <div class="tw"><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th></th></tr>` +
-    S.users.map(u => `<tr><td>${esc(u.nombre)}</td><td>${esc(u.email)}</td>
-  <td><select onchange="setRol('${esc(u.email)}',this.value)" style="width:150px">${ROLES.map(r => `<option ${r === u.rol ? 'selected' : ''}>${r}</option>`).join('')}</select></td>
-  <td>${u.email !== me.email ? `<button class="btn s danger" title="Eliminar" aria-label="Eliminar" onclick="delUser('${esc(u.email)}')">🗑</button>` : '<small style="color:var(--text3)">(tú)</small>'}</td></tr>`).join('') + '</table></div>';
+    S.users.map(u => `<tr>
+      <td>${esc(u.nombre)}</td>
+      <td>${esc(u.email)}</td>
+      <td>
+        <select onchange="setRol('${esc(u.email)}',this.value)" style="width:150px">
+          ${ROLES.map(r => `<option ${r === u.rol ? 'selected' : ''}>${r}</option>`).join('')}
+        </select>
+      </td>
+      <td>${u.email !== me.email ? `<button class="btn s danger" title="Eliminar" aria-label="Eliminar" onclick="delUser('${esc(u.email)}')">🗑</button>` : '<small style="color:var(--text3)">(tú)</small>'}</td>
+    </tr>`).join('') + '</table></div>';
 }
 function userForm() {
   open_(`<b>Nuevo usuario</b>
@@ -278,13 +289,82 @@ async function saveNewUser() {
     alert('Ocurrió un error al guardar el usuario en Firestore.');
   }
 }
-function setRol(email, rol) {
+async function setRol(email, rol) {
+  // 1. Validar estrictamente que solo el Administrador pueda cambiar roles
+  if (me.rol !== 'Administrador') {
+    alert('No tienes permisos para realizar esta acción.');
+    render();
+    return;
+  }
+
   const u = S.users.find(x => x.email === email);
-  if (u.rol === 'Administrador' && rol !== 'Administrador' && S.users.filter(x => x.rol === 'Administrador').length < 2) { alert('Debe existir al menos un Administrador.'); render(); return }
-  u.rol = rol; save();
-  if (u.email === me.email) { enter(me.email) } else render();
+  if (!u) return;
+
+  // 2. Validar que no se quede la aplicación sin administradores
+  if (u.rol === 'Administrador' && rol !== 'Administrador' && S.users.filter(x => x.rol === 'Administrador').length < 2) { 
+    alert('Debe existir al menos un Administrador.'); 
+    render(); 
+    return; 
+  }
+
+  try {
+    // 3. Buscar y actualizar el rol directamente en la colección 'users' de Firestore
+    const querySnapshot = await firebase.firestore().collection('users').where('email', '==', email).get();
+    if (!querySnapshot.empty) {
+      const docId = querySnapshot.docs[0].id;
+      await firebase.firestore().collection('users').doc(docId).update({ rol: rol });
+    }
+
+    // 4. Actualizar el estado local y guardar
+    u.rol = rol; 
+    save();
+    
+    alert('¡Rol actualizado con éxito en la nube!');
+    
+    if (u.email === me.email) { 
+      enter(me); 
+    } else { 
+      render(); 
+    }
+  } catch (error) {
+    console.error("Error al actualizar el rol:", error);
+    alert('Ocurrió un error al actualizar el rol en Firebase.');
+  }
 }
-function delUser(email) { if (confirm('¿Eliminar este usuario?')) { S.users = S.users.filter(u => u.email !== email); save(); render() } }
+async function delUser(email) {
+  // 1. Validar estrictamente que solo el Administrador pueda eliminar usuarios
+  if (me.rol !== 'Administrador') {
+    alert('No tienes permisos para realizar esta acción.');
+    return;
+  }
+
+  // 2. Evitar que el admin se borre a sí mismo accidentalmente
+  if (email === me.email) {
+    alert('No puedes eliminar tu propia cuenta.');
+    return;
+  }
+
+  if (confirm('¿Estás seguro de eliminar este usuario?')) {
+    try {
+      // 3. Buscar y eliminar el usuario en la colección 'users' de Firestore
+      const querySnapshot = await firebase.firestore().collection('users').where('email', '==', email).get();
+      if (!querySnapshot.empty) {
+        const docId = querySnapshot.docs[0].id;
+        await firebase.firestore().collection('users').doc(docId).delete();
+      }
+
+      // 4. Actualizar el arreglo local, guardar y redibujar la pantalla
+      S.users = S.users.filter(u => u.email !== email);
+      save();
+      render();
+      
+      alert('¡Usuario eliminado correctamente de la nube!');
+    } catch (error) {
+      console.error("Error al eliminar el usuario:", error);
+      alert('Ocurrió un error al intentar eliminar el usuario de Firebase.');
+    }
+  }
+}
 
 function open_(h) { $('m').innerHTML = h; $('ov').classList.add('on') }
 function close_() { $('ov').classList.remove('on') }
@@ -315,27 +395,63 @@ async function saveProd(id) {
     precio: +$('f6').value || 0
   };
 
-  if (id) {
-    Object.assign(S.prods.find(x => x.id === id), d);
-  } else {
-    let k = S.prods.length + 1, nid;
-    do { nid = 'P' + String(k++).padStart(3, '0'); } while (S.prods.some(x => x.id === nid));
+  try {
+    if (id) {
+      // Si estás editando un producto existente
+      Object.assign(S.prods.find(x => x.id === id), d);
+      
+      // Buscar y actualizar en Firestore
+      const querySnapshot = await firebase.firestore().collection('products').where('id', '==', id).get();
+      if (!querySnapshot.empty) {
+        const docId = querySnapshot.docs[0].id;
+        await firebase.firestore().collection('products').doc(docId).update(d);
+      }
+    } else {
+      // Si estás creando un producto nuevo
+      let k = S.prods.length + 1, nid;
+      do { nid = 'P' + String(k++).padStart(3, '0'); } while (S.prods.some(x => x.id === nid));
 
-    const nuevoProducto = { id: nid, ...d };
-    S.prods.push(nuevoProducto);
-  }
+      const nuevoProducto = { id: nid, ...d };
+      
+      // Guardar en la colección 'products' de Firestore
+      await firebase.firestore().collection('products').add(nuevoProducto);
 
-  save();
-  close_();
-  side();
-  render();
-}
-function del(id) {
-  if (can('borrar') && confirm('¿Eliminar este producto?')) {
-    S.prods = S.prods.filter(p => p.id !== id);
+      S.prods.push(nuevoProducto);
+    }
+
     save();
+    close_();
     side();
     render();
+    alert('¡Producto guardado con éxito en la nube!');
+  } catch (error) {
+    console.error("Error al guardar el producto:", error);
+    alert('Ocurrió un error al guardar el producto en Firebase.');
+  }
+}
+async function del(id) {
+  if (can('borrar') && confirm('¿Eliminar este producto?')) {
+    try {
+      // 1. Buscar el documento en la colección 'products' de Firestore que coincida con el id
+      const querySnapshot = await firebase.firestore().collection('products').where('id', '==', id).get();
+      
+      if (!querySnapshot.empty) {
+        const docId = querySnapshot.docs[0].id;
+        // 2. Eliminar el documento directamente de Firestore
+        await firebase.firestore().collection('products').doc(docId).delete();
+      }
+
+      // 3. Actualizar el arreglo local, guardar y redibujar la pantalla
+      S.prods = S.prods.filter(p => p.id !== id);
+      save();
+      side();
+      render();
+      
+      alert('¡Producto eliminado correctamente de la nube!');
+    } catch (error) {
+      console.error("Error al eliminar el producto:", error);
+      alert('Ocurrió un error al intentar eliminar el producto de Firebase.');
+    }
   }
 }
 function cfgForm() {
