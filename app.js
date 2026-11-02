@@ -59,18 +59,15 @@ async function hash(p) {
   try { const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode('ms:' + p)); return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('') }
   catch (e) { let h = 0; for (const c of 'ms:' + p)h = (h * 31 + c.charCodeAt(0)) | 0; return 'x' + h }
 }
-function authView(mode) {
-  const reg = mode === 'reg' || !S.users.length;
-  $('am').innerHTML = `<b style="font-size:16px">${esc(S.cfg.nombre)}</b>
-  <span style="color:var(--text2)">${reg ? 'Crea tu cuenta para acceder al sistema' : 'Inicia sesión para continuar'}</span>
-  ${reg && !S.users.length ? '<span class="alert" style="margin:0">El primer usuario registrado será Administrador.</span>' : ''}
-  ${reg ? '<label>Nombre<input id="an"/></label>' : ''}
-  <label>Correo<input id="ae" type="email"/></label>
-  <label>Contraseña<input id="ap" type="password"/></label>
-  ${reg ? '<label>Confirmar contraseña<input id="ac" type="password"/></label>' : ''}
-  <div class="err" id="aerr"></div>
-  <button class="btn p" onclick="${reg ? 'doReg()' : 'doLogin()'}">${reg ? 'Registrarme' : 'Entrar'}</button>
-  ${S.users.length ? `<button class="lnk" onclick="authView('${reg ? 'login' : 'reg'}')">${reg ? 'Ya tengo cuenta: iniciar sesión' : 'No tengo cuenta: registrarme'}</button>` : ''}`;
+function authView() {
+  $('am').innerHTML = `
+    <b style="font-size:16px">${esc(S.cfg.nombre)}</b>
+    <span style="color:var(--text2)">Inicia sesión para continuar</span>
+    <label>Correo<input id="ae" type="email"/></label>
+    <label>Contraseña<input id="ap" type="password"/></label>
+    <div class="err" id="aerr"></div>
+    <button class="btn p" onclick="doLogin()">Entrar</button>
+  `;
 }
 const aerr = t => $('aerr').textContent = t;
 
