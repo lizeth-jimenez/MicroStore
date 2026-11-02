@@ -196,11 +196,19 @@ async function addMov(tipo) {
   S.movs.push(nuevoMovimiento);
 
   try {
-    // 2. Buscar el producto en Firestore y actualizar su nuevo stock en la nube
+    // 2. Buscar directamente el documento en Firestore cuyo campo 'id' coincida, 
+    // y actualizar tanto el stock como asegurarnos de guardar su id interno si le faltaba.
     const querySnapshot = await firebase.firestore().collection('products').where('id', '==', pid).get();
+    
     if (!querySnapshot.empty) {
-      const docId = querySnapshot.docs[0].id;
-      await firebase.firestore().collection('products').doc(docId).update({ stock: p.stock });
+      // Recorremos por si hubiera duplicados y actualizamos todos los que coincidan con ese id
+      for (const doc of querySnapshot.docs) {
+        await firebase.firestore().collection('products').doc(doc.id).update({ 
+          stock: p.stock 
+        });
+      }
+    } else {
+      console.warn("No se encontró el producto en Firestore con el id:", pid);
     }
   } catch (error) {
     console.error("Error al actualizar el stock en Firebase:", error);
