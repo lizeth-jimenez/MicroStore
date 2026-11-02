@@ -6,65 +6,126 @@
 <title>MicroStore</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark;
 --bg:#fff;--bg2:#f7f7f6;--bg3:#f0efec;--text:#1a1a18;--text2:#5a5a56;--text3:#9a9994;--border:rgba(0,0,0,.12);
---blue:#185FA5;--gbg:#EAF3DE;--gt:#27500A;--abg:#FAEEDA;--at:#633806;--rbg:#FCEBEB;--rt:#791F1F;--r:8px}
+--blue:#185FA5;--blue-h:#124a82;--gbg:#EAF3DE;--gt:#27500A;--abg:#FAEEDA;--at:#633806;--rbg:#FCEBEB;--rt:#791F1F;--r:10px;
+--shadow:0 1px 2px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.05);--ring:0 0 0 3px rgba(24,95,165,.28)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
-@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1e1c;--bg2:#2a2a27;--bg3:#242422;--text:#f0efec;--text2:#a8a8a2;--text3:#6a6a64;--border:rgba(255,255,255,.14);--blue:#378ADD;--gbg:#173404;--gt:#C0DD97;--abg:#412402;--at:#FAC775;--rbg:#501313;--rt:#F7C1C1}}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1e1e1c;--bg2:#2a2a27;--bg3:#242422;--text:#f0efec;--text2:#a8a8a2;--text3:#6a6a64;--border:rgba(255,255,255,.14);--blue:#378ADD;--blue-h:#5aa3e8;--gbg:#173404;--gt:#C0DD97;--abg:#412402;--at:#FAC775;--rbg:#501313;--rt:#F7C1C1;--shadow:0 1px 2px rgba(0,0,0,.4),0 4px 12px rgba(0,0,0,.3);--ring:0 0 0 3px rgba(55,138,221,.4)}}
 html,body{height:100%}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:13px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:13px;line-height:1.4;-webkit-font-smoothing:antialiased}
 .app{display:flex;height:100%}
-.side{width:210px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 8px}
+
+/* Barra lateral */
+.side{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:14px 10px}
 .brand{padding:4px 8px 14px;border-bottom:1px solid var(--border);margin-bottom:10px}
-.brand b{font-size:16px;display:block}.brand small{color:var(--text3);font-size:11px}
-.nav{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:var(--r);cursor:pointer;color:var(--text2);margin-bottom:2px;border:1px solid transparent;background:none;width:100%;font-size:13px;text-align:left}
-.nav.on{background:var(--bg);color:var(--text);font-weight:500;border-color:var(--border)}
-.cnt{margin-left:auto;background:var(--rbg);color:var(--rt);border-radius:99px;font-size:10px;padding:1px 6px}
+.brand b{font-size:17px;display:block}.brand b::before{content:"🛍️ "}
+.brand small{color:var(--text3);font-size:11px}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--r);cursor:pointer;color:var(--text2);margin-bottom:3px;border:1px solid transparent;background:none;width:100%;font-size:13px;text-align:left;transition:background .15s,color .15s}
+.nav:hover{background:var(--bg3);color:var(--text)}
+.nav.on{background:var(--bg);color:var(--blue);font-weight:600;border-color:var(--border);box-shadow:var(--shadow)}
+.cnt{margin-left:auto;background:var(--rbg);color:var(--rt);border-radius:99px;font-size:10px;font-weight:600;padding:1px 7px}
+
+/* Estructura principal */
 .main{flex:1;display:flex;flex-direction:column;min-width:0}
-.top{display:flex;align-items:center;gap:8px;padding:12px 18px;background:var(--bg);border-bottom:1px solid var(--border)}
-.top h1{font-size:15px;font-weight:500;flex:1}
-.content{flex:1;overflow-y:auto;padding:18px}
-input,select{padding:8px 10px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:13px;width:100%}
-.btn{padding:8px 14px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;white-space:nowrap}
-.btn.p{background:var(--blue);color:#fff;border-color:var(--blue)}
-.btn.s{padding:4px 8px;font-size:12px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-.stat{background:var(--bg2);border-radius:var(--r);padding:12px}
-.stat small{color:var(--text3);font-size:11px}.stat b{display:block;font-size:20px;margin-top:3px}
-.alert{background:var(--abg);color:var(--at);border-radius:var(--r);padding:9px 12px;margin-bottom:14px}
-h2{font-size:13px;font-weight:500;margin:4px 0 10px}
-.tw{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow-x:auto;margin-bottom:16px}
+.top{display:flex;align-items:center;gap:8px;padding:12px 20px;background:var(--bg);border-bottom:1px solid var(--border);box-shadow:var(--shadow)}
+.top h1{font-size:16px;font-weight:600;flex:1}
+.content{flex:1;overflow-y:auto;padding:20px}
+
+/* Formularios y botones */
+input,select{padding:9px 11px;border-radius:var(--r);border:1px solid var(--border);background:var(--bg2);color:var(--text);font-size:13px;width:100%;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:var(--ring)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-size:13px;white-space:nowrap;transition:background .15s,transform .05s,box-shadow .15s}
+.btn:hover{background:var(--bg3)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible,.nav:focus-visible,.lnk:focus-visible{outline:none;box-shadow:var(--ring)}
+.btn.p{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:500}
+.btn.p:hover{background:var(--blue-h);border-color:var(--blue-h)}
+.btn.s{padding:5px 9px;font-size:12px}
+.btn.danger{color:var(--rt)}
+.btn.danger:hover{background:var(--rbg);border-color:var(--rt)}
+.acts{display:flex;gap:6px;flex-wrap:wrap}
+
+/* Tarjetas de resumen */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:var(--bg);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:12px;padding:14px}
+.stat small{color:var(--text3);font-size:11px;font-weight:500}.stat b{display:block;font-size:21px;margin-top:4px;overflow-wrap:anywhere}
+.alert{background:var(--abg);color:var(--at);border-radius:var(--r);padding:10px 14px;margin-bottom:16px;border-left:4px solid var(--at)}
+h2{font-size:13px;font-weight:600;margin:4px 0 10px}
+
+/* Tablas */
+.tw{background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow-x:auto;margin-bottom:16px;box-shadow:var(--shadow)}
 table{width:100%;border-collapse:collapse;font-size:12px;min-width:480px}
-th{text-align:left;padding:9px 12px;color:var(--text3);font-weight:500;background:var(--bg2)}
-td{padding:9px 12px;border-top:1px solid var(--border)}
-.bd{padding:2px 8px;border-radius:99px;font-size:11px;font-weight:500}
+th{text-align:left;padding:10px 12px;color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em;background:var(--bg2)}
+td{padding:10px 12px;border-top:1px solid var(--border);vertical-align:middle}
+@media(hover:hover){tr:hover td{background:var(--bg2)}}
+.pi{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:8px;background:var(--bg3);margin-right:8px;font-size:14px}
+
+/* Estados */
+.bd{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:500;white-space:nowrap}
 .ok{background:var(--gbg);color:var(--gt)}.low{background:var(--abg);color:var(--at)}.out{background:var(--rbg);color:var(--rt)}
-.form{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:10px;align-items:end}
-.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;max-width:420px}
-label{font-size:11px;color:var(--text2);display:flex;flex-direction:column;gap:4px}
-.bar{height:8px;background:var(--blue);border-radius:4px}
+.bd.ok::before{content:"✓"}.bd.low::before{content:"⚠"}.bd.out::before{content:"✕"}
+.bd.in{background:var(--gbg);color:var(--gt)}.bd.in::before{content:"↓"}
+.bd.sal{background:var(--abg);color:var(--at)}.bd.sal::before{content:"↑"}
+
+.form{background:var(--bg);border:1px solid var(--border);box-shadow:var(--shadow);border-radius:12px;padding:16px;margin-bottom:16px;display:grid;grid-template-columns:2fr 1fr 2fr auto;gap:12px;align-items:end}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;max-width:420px}
+label{font-size:11px;color:var(--text2);font-weight:500;display:flex;flex-direction:column;gap:4px}
+.bar{height:8px;background:linear-gradient(90deg,var(--blue),var(--blue-h));border-radius:4px}
 .row{display:grid;grid-template-columns:140px 1fr 90px;gap:10px;align-items:center;margin-bottom:8px}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center;z-index:9}
+
+/* Ventanas modales */
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);display:none;align-items:center;justify-content:center;z-index:9}
 .ov.on{display:flex}
-.modal{background:var(--bg);border-radius:12px;padding:18px;width:400px;max-width:94vw;max-height:90%;overflow:auto;display:grid;gap:10px}
+.modal{background:var(--bg);border-radius:14px;padding:20px;width:420px;max-width:94vw;max-height:90%;overflow:auto;display:grid;gap:12px;box-shadow:0 20px 50px rgba(0,0,0,.28);animation:pop .18s ease-out}
+.modal>b:first-child{padding-bottom:10px;border-bottom:1px solid var(--border)}
+#am>b:first-child{padding-bottom:0;border-bottom:0}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
 #auth{background:var(--bg3);z-index:20}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.empty{padding:24px;text-align:center;color:var(--text3)}
+.empty{padding:28px;text-align:center;color:var(--text3)}
 .err{color:var(--rt);font-size:12px;min-height:14px}
 .dl{display:grid;grid-template-columns:110px 1fr;gap:6px;font-size:12px}.dl span:nth-child(odd){color:var(--text3)}
 .lnk{color:var(--blue);cursor:pointer;text-decoration:underline;background:none;border:0;font-size:12px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Vista para celulares */
 @media(max-width:680px){
 .app{flex-direction:column}
-.side{order:2;width:100%;flex-direction:row;padding:4px;border-right:0;border-top:1px solid var(--border);overflow-x:auto}
+.side{order:2;width:100%;flex-direction:row;padding:4px;border-right:0;border-top:1px solid var(--border);overflow-x:auto;box-shadow:0 -2px 10px rgba(0,0,0,.06)}
 .brand{display:none}
-.nav{flex-direction:column;gap:2px;font-size:10px;padding:6px 4px;text-align:center;flex:1;min-width:58px}
+.nav{flex-direction:column;gap:2px;font-size:10px;padding:7px 4px;text-align:center;flex:1;min-width:62px;margin-bottom:0;position:relative}
 .nav span.t{font-size:10px}
-.stats{grid-template-columns:1fr 1fr}
+.cnt{position:absolute;top:2px;right:8px;margin:0}
+.stats{grid-template-columns:1fr 1fr;gap:10px}
+.stat b{font-size:18px}
 .form{grid-template-columns:1fr}
+.filters{max-width:none}
 .top{flex-wrap:wrap;padding:10px 12px}
+#who{order:8}
 #q{width:100%!important;order:9}
 .content{padding:12px}
 .row{grid-template-columns:90px 1fr 70px}
+input,select{font-size:16px;min-height:42px}
+.btn{min-height:40px}
+.btn.s{min-height:36px;padding:6px 12px}
+/* tablas convertidas en tarjetas */
+table.cards{min-width:0}
+.cards,.cards tbody,.cards tr,.cards td{display:block;width:100%}
+.cards tr:first-child{display:none}
+.cards tr{padding:10px 14px;border-top:1px solid var(--border)}
+.cards tr:nth-child(2){border-top:0}
+.cards td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;padding:4px 0;text-align:right}
+.cards td::before{content:attr(data-label);color:var(--text3);font-weight:500;text-align:left}
+.cards td .pi{margin-left:auto}
+.cards td.ac{justify-content:flex-start;padding-top:8px}
+.cards td.ac::before{display:none}
+/* modales como hoja inferior */
+.ov{align-items:flex-end}
+.modal{width:100%;max-width:100%;max-height:92%;border-radius:16px 16px 0 0;animation:sheet .22s ease-out}
+#auth{align-items:center}
+#auth .modal{width:94vw;border-radius:14px}
+@keyframes sheet{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 }
 </style>
 </head>
@@ -122,6 +183,7 @@ const money=n=>S.cfg.moneda+Number(n).toLocaleString('es');
 const est=p=>p.stock<=0?'out':p.stock<=p.min?'low':'ok';
 const lbl={ok:'En stock',low:'Stock bajo',out:'Agotado'};
 const bd=e=>`<span class="bd ${e}">${lbl[e]}</span>`;
+const catIcon=c=>{c=String(c).toLowerCase();return c.includes('ropa')?'👕':c.includes('hogar')?'🏠':c.includes('empaque')?'📦':c.includes('alimento')||c.includes('comida')?'🍎':c.includes('servicio')?'🛠️':'🏷️'};
 const nom=id=>(S.prods.find(p=>p.id===id)||{nombre:'(eliminado)'}).nombre;
 const alertas=()=>S.prods.filter(p=>est(p)!=='ok');
 
@@ -199,15 +261,15 @@ function render(){
 /* ── Vistas ── */
 function movTable(list){
   if(!list.length)return '<div class="empty">Sin movimientos todavía</div>';
-  return `<div class="tw"><table><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cant.</th><th>Nota</th><th>Usuario</th></tr>`+
-  list.map(m=>`<tr><td>${m.fecha}</td><td><span class="bd ${m.tipo==='Entrada'?'ok':'low'}">${m.tipo}</span></td><td>${esc(nom(m.pid))}</td><td>${m.cant}</td><td>${esc(m.nota||'')}</td><td>${esc(m.user||'')}</td></tr>`).join('')+'</table></div>';
+  return `<div class="tw"><table class="cards"><tr><th>Fecha</th><th>Tipo</th><th>Producto</th><th>Cant.</th><th>Nota</th><th>Usuario</th></tr>`+
+  list.map(m=>`<tr><td data-label="Fecha">${m.fecha}</td><td data-label="Tipo"><span class="bd ${m.tipo==='Entrada'?'in':'sal'}">${m.tipo}</span></td><td data-label="Producto">${esc(nom(m.pid))}</td><td data-label="Cant.">${m.cant}</td><td data-label="Nota">${esc(m.nota||'')}</td><td data-label="Usuario">${esc(m.user||'')}</td></tr>`).join('')+'</table></div>';
 }
 function dashboard(){
   const u=S.prods.reduce((a,p)=>a+p.stock,0),v=S.prods.reduce((a,p)=>a+p.stock*p.precio,0),a=alertas().length;
-  return `<div class="stats"><div class="stat"><small>Productos</small><b>${S.prods.length}</b></div>
-  <div class="stat"><small>Unidades en stock</small><b>${u}</b></div>
-  <div class="stat"><small>Valor del inventario</small><b>${money(v)}</b></div>
-  <div class="stat"><small>Alertas</small><b>${a}</b></div></div>`+
+  return `<div class="stats"><div class="stat"><small>📦 Productos</small><b>${S.prods.length}</b></div>
+  <div class="stat"><small>🧮 Unidades en stock</small><b>${u}</b></div>
+  <div class="stat"><small>💰 Valor del inventario</small><b>${money(v)}</b></div>
+  <div class="stat"><small>🔔 Alertas</small><b>${a}</b></div></div>`+
   (a?`<div class="alert">⚠️ ${a} producto(s) con stock bajo o agotado. <a href="#" onclick="go('alertas');return false" style="color:inherit;font-weight:500">Ver</a></div>`:'')+
   `<h2>Últimos movimientos</h2>`+movTable([...S.movs].reverse().slice(0,6));
 }
@@ -218,9 +280,9 @@ function inventario(){
   const filt=`<div class="filters"><label>Categoría<select onchange="fc=this.value;render()"><option value="">Todas</option>${cats.map(c=>`<option ${c===fc?'selected':''} value="${esc(c)}">${esc(c)}</option>`).join('')}</select></label>
   <label>Estado<select onchange="fe=this.value;render()"><option value="">Todos</option>${Object.keys(lbl).map(k=>`<option ${k===fe?'selected':''} value="${k}">${lbl[k]}</option>`).join('')}</select></label></div>`;
   if(!l.length)return filt+'<div class="empty">No se encontraron productos con esos criterios.</div>';
-  return filt+`<div class="tw"><table><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Estado</th><th></th></tr>`+
-  l.map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.nombre)}</td><td>${esc(p.cat)}</td><td>${p.stock} ${esc(p.und||'')}</td><td>${money(p.precio)}</td><td>${bd(est(p))}</td>
-  <td style="white-space:nowrap"><button class="btn s" onclick="detalle('${p.id}')">Ver</button>${can('editar')?` <button class="btn s" onclick="prodForm('${p.id}')">Editar</button>`:''}${can('borrar')?` <button class="btn s" onclick="del('${p.id}')">🗑</button>`:''}</td></tr>`).join('')+'</table></div>';
+  return filt+`<div class="tw"><table class="cards"><tr><th>Código</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio</th><th>Estado</th><th></th></tr>`+
+  l.map(p=>`<tr><td data-label="Código">${esc(p.id)}</td><td data-label="Producto"><span class="pi">${catIcon(p.cat)}</span>${esc(p.nombre)}</td><td data-label="Categoría">${esc(p.cat)}</td><td data-label="Stock">${p.stock} ${esc(p.und||'')}</td><td data-label="Precio">${money(p.precio)}</td><td data-label="Estado">${bd(est(p))}</td>
+  <td class="ac"><div class="acts"><button class="btn s" onclick="detalle('${p.id}')">👁 Ver</button>${can('editar')?`<button class="btn s" onclick="prodForm('${p.id}')">✏️ Editar</button>`:''}${can('borrar')?`<button class="btn s danger" title="Eliminar" aria-label="Eliminar" onclick="del('${p.id}')">🗑</button>`:''}</div></td></tr>`).join('')+'</table></div>';
 }
 function detalle(id){
   const p=S.prods.find(x=>x.id===id);if(!p)return;
@@ -264,16 +326,16 @@ function addMov(tipo){
 function al(){
   const l=alertas();
   if(!l.length)return '<div class="empty">✅ Todo en orden, no hay alertas.</div>';
-  return `<div class="tw"><table><tr><th>Producto</th><th>Stock</th><th>Mínimo</th><th>Estado</th></tr>`+
-  l.map(p=>`<tr><td>${esc(p.nombre)}</td><td>${p.stock}</td><td>${p.min}</td><td>${bd(est(p))}</td></tr>`).join('')+'</table></div>';
+  return `<div class="tw"><table class="cards"><tr><th>Producto</th><th>Stock</th><th>Mínimo</th><th>Estado</th></tr>`+
+  l.map(p=>`<tr><td data-label="Producto"><span class="pi">${catIcon(p.cat)}</span>${esc(p.nombre)}</td><td data-label="Stock">${p.stock}</td><td data-label="Mínimo">${p.min}</td><td data-label="Estado">${bd(est(p))}</td></tr>`).join('')+'</table></div>';
 }
 function reportes(){
   if(!S.prods.length)return '<div class="empty">Sin datos</div>';
   const top=[...S.prods].sort((a,b)=>b.stock*b.precio-a.stock*a.precio).slice(0,6),mx=Math.max(1,top[0].stock*top[0].precio);
   const cats={};S.prods.forEach(p=>{cats[p.cat]=(cats[p.cat]||0)+p.stock*p.precio});
   const sum=t=>S.movs.filter(m=>m.tipo===t).reduce((a,m)=>a+m.cant,0);
-  return `<div class="stats"><div class="stat"><small>Unidades ingresadas</small><b>${sum('Entrada')}</b></div><div class="stat"><small>Unidades de salida</small><b>${sum('Salida')}</b></div>
-  <div class="stat"><small>Categorías</small><b>${Object.keys(cats).length}</b></div><div class="stat"><small>Movimientos</small><b>${S.movs.length}</b></div></div>
+  return `<div class="stats"><div class="stat"><small>⬇️ Unidades ingresadas</small><b>${sum('Entrada')}</b></div><div class="stat"><small>⬆️ Unidades de salida</small><b>${sum('Salida')}</b></div>
+  <div class="stat"><small>🏷️ Categorías</small><b>${Object.keys(cats).length}</b></div><div class="stat"><small>🔁 Movimientos</small><b>${S.movs.length}</b></div></div>
   <h2>Productos con mayor valor en inventario</h2>`+
   top.map(p=>`<div class="row"><span>${esc(p.nombre)}</span><div class="bar" style="width:${Math.max(3,p.stock*p.precio/mx*100)}%"></div><span>${money(p.stock*p.precio)}</span></div>`).join('')+
   `<h2 style="margin-top:16px">Valor por categoría</h2><div class="tw"><table><tr><th>Categoría</th><th>Valor</th></tr>`+
@@ -286,7 +348,7 @@ function usuarios(){
   <div class="tw"><table><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th></th></tr>`+
   S.users.map(u=>`<tr><td>${esc(u.nombre)}</td><td>${esc(u.email)}</td>
   <td><select onchange="setRol('${esc(u.email)}',this.value)" style="width:150px">${ROLES.map(r=>`<option ${r===u.rol?'selected':''}>${r}</option>`).join('')}</select></td>
-  <td>${u.email!==me.email?`<button class="btn s" onclick="delUser('${esc(u.email)}')">🗑</button>`:'<small style="color:var(--text3)">(tú)</small>'}</td></tr>`).join('')+'</table></div>';
+  <td>${u.email!==me.email?`<button class="btn s danger" title="Eliminar" aria-label="Eliminar" onclick="delUser('${esc(u.email)}')">🗑</button>`:'<small style="color:var(--text3)">(tú)</small>'}</td></tr>`).join('')+'</table></div>';
 }
 function setRol(email,rol){
   const u=S.users.find(x=>x.email===email);
