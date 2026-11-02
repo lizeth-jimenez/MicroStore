@@ -1,6 +1,15 @@
 // ==========================================
 // 1. CONEXIÓN A FIREBASE CLOUD FIRESTORE
 // ==========================================
+const firebaseConfig = {
+  apiKey: "AIzaSyDZg7Q-IUcfx7Ps_YZXdW4vjsoTzjTS8Ow",
+  authDomain: "microstore-fd035.firebaseapp.com",
+  projectId: "microstore-fd035",
+  storageBucket: "microstore-fd035.firebasestorage.app",
+  messagingSenderId: "531455837492",
+  appId: "1:531455837492:web:48454911eb4b394b9a5161"
+};
+// Inicializar Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
