@@ -99,7 +99,7 @@ async function doLogin() {
     aerr('Ocurrió un error al intentar iniciar sesión.');
   }
 }
-function enter(userData) {
+async function enter(userData) {
   me = userData;
   try { sessionStorage.setItem('ms-session', me.email) } catch (e) { }
   
@@ -354,6 +354,7 @@ function saveCfg() {
 /* ── Inicio ── */
 let ses = null; try { ses = sessionStorage.getItem('ms-session') } catch (e) { }
 /* ── Inicio ── */
+
 if (ses) {
   // Si hay sesión guardada, consultamos Firestore para restaurarla
   firebase.firestore().collection('users').where('email', '==', ses).get().then(snap => {
