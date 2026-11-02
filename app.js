@@ -346,7 +346,6 @@ function saveCfg() {
 /* ── Inicio ── */
 let ses = null; try { ses = sessionStorage.getItem('ms-session') } catch (e) { }
 /* ── Inicio ── */
-let ses = null; try { ses = sessionStorage.getItem('ms-session') } catch (e) { }
 if (ses) {
   // Si hay sesión guardada, consultamos Firestore para restaurarla
   firebase.firestore().collection('users').where('email', '==', ses).get().then(snap => {
