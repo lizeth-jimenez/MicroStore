@@ -184,19 +184,33 @@ function mov(tipo) {
   <button class="btn p" onclick="addMov('${tipo}')">Registrar ${tipo.toLowerCase()}</button></div>` +
     movTable([...S.movs].reverse().filter(m => m.tipo === tipo));
 }
-function addMov(tipo) {
+async function addMov(tipo) {
   if (!can('mov')) return;
   const pid = $('mp').value, c = parseInt($('mc').value), p = S.prods.find(x => x.id === pid);
   if (!p || !c || c < 1) return;
   if (tipo === 'Salida' && c > p.stock) { alert('No hay suficiente stock (disponible: ' + p.stock + ')'); return; }
 
+  // 1. Modificar el stock localmente
   p.stock += tipo === 'Entrada' ? c : -c;
   const nuevoMovimiento = { fecha: hoy(), tipo, pid, cant: c, nota: $('mn').value, user: me.nombre };
   S.movs.push(nuevoMovimiento);
 
+  try {
+    // 2. Buscar el producto en Firestore y actualizar su nuevo stock en la nube
+    const querySnapshot = await firebase.firestore().collection('products').where('id', '==', pid).get();
+    if (!querySnapshot.empty) {
+      const docId = querySnapshot.docs[0].id;
+      await firebase.firestore().collection('products').doc(docId).update({ stock: p.stock });
+    }
+  } catch (error) {
+    console.error("Error al actualizar el stock en Firebase:", error);
+    alert('Ocurrió un error al actualizar el stock en la nube.');
+  }
+
   save();
   side();
   render();
+  alert(`¡${tipo} registrada con éxito!`);
 }
 function al() {
   const l = alertas();
