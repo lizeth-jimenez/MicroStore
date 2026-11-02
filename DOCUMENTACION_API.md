@@ -100,5 +100,5 @@ Las operaciones CRUD de productos se comunican de forma asíncrona directamente 
 | Rol | Ver Inventario / Reportes | Entradas / Salidas | Crear / Editar Productos | Eliminar Productos / Usuarios |
 | :--- | :---: | :---: | :---: | :---: |
 | **Administrador** | ✅ | ✅ | ✅ | ✅ |
-| **Empleado** | ✅ | ✅ | ❌ | ❌ |
+| **Empleado** | ✅ | ✅ | ✅ | ❌ |
 | **Consulta** | ✅ | ❌ | ❌ | ❌ |
